@@ -1,0 +1,7 @@
+lib/Mojolicious/Plugin/Oro.pm
+lib/Mojolicious/Plugin/Oro/oro_init.pm
+t/Oro.t
+Changes
+MANIFEST
+LICENSE
+Makefile.PL
