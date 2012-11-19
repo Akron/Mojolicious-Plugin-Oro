@@ -1,8 +1,12 @@
 package Mojolicious::Plugin::Oro;
 use Mojo::Base 'Mojolicious::Plugin';
+use File::Spec;
 use Carp qw/carp croak/;
 
-our $VERSION = 0.01;
+our $VERSION = 0.02;
+
+# Todo:
+# - return Mojo-Collections instead of Array-refs on select etc. Possible?
 
 # Database driver
 use DBIx::Oro;
@@ -43,6 +47,14 @@ sub register {
 
 	# Already exists
 	next if exists $databases->{$name};
+
+	# Make path portable
+	# (Especially for mounted apps)
+	if ($db->{file} &&
+	      index($db->{file}, ':') != 0 &&
+		!File::Spec->file_name_is_absolute($db->{file})) {
+	  $db->{file} = File::Spec->catdir($mojo->home, $db->{file});
+        };
 
 	# Get Database handle
 	my $oro = DBIx::Oro->new(

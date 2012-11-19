@@ -118,3 +118,5 @@ is_deeply($app->commands->namespaces, [
 ], 'Commands-Namespace');
 
 ok($app->commands->run('oro_init'), 'Init');
+
+# Todo: Test app->home fix
