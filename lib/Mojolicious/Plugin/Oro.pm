@@ -1,15 +1,12 @@
 package Mojolicious::Plugin::Oro;
 use Mojo::Base 'Mojolicious::Plugin';
 use File::Spec;
-use Carp qw/carp croak/;
+use DBIx::Oro;
 
-our $VERSION = 0.02;
+our $VERSION = '0.03';
 
 # Todo:
 # - return Mojo-Collections instead of Array-refs on select etc. Possible?
-
-# Database driver
-use DBIx::Oro;
 
 # Register Plugin
 sub register {
@@ -42,6 +39,7 @@ sub register {
   Mojo::IOLoop->timer(
     0 => sub {
 
+      # Loop through all databases
       foreach my $name (keys %$param) {
 	my $db = $param->{$name};
 
@@ -53,6 +51,8 @@ sub register {
 	if ($db->{file} &&
 	      index($db->{file}, ':') != 0 &&
 		!File::Spec->file_name_is_absolute($db->{file})) {
+
+	  # Specify local path depending on app home
 	  $db->{file} = File::Spec->catdir($mojo->home, $db->{file});
         };
 
@@ -71,6 +71,7 @@ sub register {
           }
 	);
 
+	# Database newly created
 	if ($oro->created) {
 
 	  # Emit on_oro_init hook
@@ -84,7 +85,9 @@ sub register {
 	};
 
 	# No succesful creation
-	croak "Unable to create database handle '$name'" unless $oro;
+	unless ($oro) {
+	  $mojo->log->warn("Unable to create database handle '$name'");
+	};
 
 	# Store database handle
 	$databases->{$name} = $oro;
@@ -97,10 +100,13 @@ sub register {
     oro => sub {
       my ($c, $name, $table) = @_;
       $name //= 'default';
+
+      Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
+
       my $oro = $databases->{$name};
 
       # Database unknown
-      carp "Unknown database '$name'" unless $oro;
+      $mojo->log->warn("Unknown database '$name'") unless $oro;
 
       # Return database handle
       return $oro unless $table;

@@ -12,7 +12,6 @@ WriteMakefile(
     'Mojolicious' => 3.43,
     'Test::More' => 0,
     'DBIx::Oro' => 0.22,
-    'Carp' => 0,
     'File::Spec' => 0
   },
   LICENSE      => 'perl',
