@@ -3,7 +3,7 @@ use Mojo::Base 'Mojolicious::Plugin';
 use File::Spec;
 use DBIx::Oro;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 # Todo:
 # - return Mojo-Collections instead of Array-refs on select etc. Possible?
@@ -168,6 +168,9 @@ C<default> is assumed.
 
 =head1 METHODS
 
+L<Mojolicious::Plugin::Oro> inherits all methods from
+L<Mojolicious::Plugin> and implements the following new ones.
+
 =head2 C<register>
 
   # Mojolicious
@@ -266,7 +269,7 @@ L<DBIx::Oro>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012, Nils Diewald.
+Copyright (C) 2012-2013, Nils Diewald.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.
