@@ -201,6 +201,11 @@ associated with a L<DBIx::Oro> object.
 All parameters can be set either on registration or
 as part of the configuration file with the key C<Oro>.
 
+The database handles have to be unique, i.e.
+you can't have multiple different C<default> databases in mounted
+applications using L<Mojolicious::Plugin::Mount>.
+
+
 =head1 HOOKS
 
 =head2 C<on_DBNAME_oro_init>
