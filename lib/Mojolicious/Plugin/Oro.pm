@@ -44,7 +44,10 @@ sub register {
 	my $db = $param->{$name};
 
 	# Already exists
-	next if exists $databases->{$name};
+	if (exists $databases->{$name}) {
+	  $mojo->log->warn("Multiple attempts to establish database '$name'");
+	  next;
+	};
 
 	# Make path portable
 	# (Especially for mounted apps)
