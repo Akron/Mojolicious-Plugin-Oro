@@ -1,3 +1,6 @@
+0.05 2013-03-24
+        - Small documentation tweaks.
+
 0.04 2013-03-01
         - Update year.
 	- Warn regarding non-unique database handles.
