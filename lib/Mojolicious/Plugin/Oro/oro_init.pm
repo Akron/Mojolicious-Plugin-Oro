@@ -67,6 +67,12 @@ Mojolicious::Plugin::Oro::oro_init - Initialize Oro Databases
   my $oro_init = Mojolicious::Plugin::Oro::oro_init->new;
   $oro_init->run;
 
+Command line usage:
+
+  perl app.pl oro_init
+  perl app.pl oro_init 'default' 'Books'
+
+
 =head1 DESCRIPTION
 
 L<Mojolicious::Plugin::Oro::oro_init> initializes all Oro
@@ -75,7 +81,7 @@ databases associated with L<Mojolicious::Plugin::Oro>.
 =head1 ATTRIBUTES
 
 L<Mojolicious::Plugin::Oro::oro_init> inherits all attributes
-from L<Mojo::Command> and implements the following new ones.
+from L<Mojolicious::Command> and implements the following new ones.
 
 =head2 C<description>
 
@@ -94,7 +100,7 @@ Usage information for this command, used for the help screen.
 =head1 METHODS
 
 L<Mojolicious::Plugin::Oro::oro_init> inherits all methods from
-L<Mojo::Command> and implements the following new ones.
+L<Mojolicious::Command> and implements the following new ones.
 
 =head2 C<run>
 
