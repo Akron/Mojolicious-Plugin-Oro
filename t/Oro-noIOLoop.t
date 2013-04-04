@@ -3,8 +3,6 @@ use Mojolicious::Lite;
 use Test::More tests => 27;
 use Test::Mojo;
 
-$|++;
-
 use lib 'lib';
 use lib '../lib';
 use_ok 'DBIx::Oro';
