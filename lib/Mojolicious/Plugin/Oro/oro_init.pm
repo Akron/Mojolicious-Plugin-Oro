@@ -25,6 +25,8 @@ sub run {
 
   my $app = $self->app;
 
+  Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
+
   my $databases = $app->can('oro_handles') ? $app->oro_handles : {};
 
   @ARGV = keys %$databases unless @ARGV;
@@ -35,8 +37,9 @@ sub run {
     if (exists $databases->{$name}) {
       $app->plugins->emit_hook(
 	'on_' . ($name ne 'default' ? $name . '_' : '') . 'oro_init' =>
-	  $databases->{$name}
+	  $databases->{$name}, $app
 	);
+      $app->log->info(qq{Initialized Oro-DB "$name"});
     }
 
     # Database does not exist

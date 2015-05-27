@@ -3,7 +3,7 @@ use Mojo::Base 'Mojolicious::Plugin';
 use File::Spec;
 use DBIx::Oro;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 # Todo:
 # - return Mojo-Collections instead of Array-refs on select etc. Possible?
@@ -14,7 +14,7 @@ sub register {
 
   # Load parameter from Config file
   if (my $config_param = $mojo->config('Oro')) {
-    $param = { %$config_param, %$param };
+    $param = { %$param, %$config_param };
   };
 
   # Hash of database handles
@@ -59,6 +59,9 @@ sub register {
 	  $db->{file} = File::Spec->catdir($mojo->home, $db->{file});
         };
 
+	# Remove init advice
+	my $init = delete $db->{init};
+
 	# Get Database handle
 	my $oro = DBIx::Oro->new(
 	  %$db,
@@ -69,27 +72,36 @@ sub register {
 	    # Emit on_oro_connect hook
 	    $mojo->plugins->emit_hook(
 	      'on_' . ($name ne 'default' ? $name . '_' : '') . 'oro_connect' =>
-		$oro
+		$oro, $mojo
 	      );
           }
 	);
 
+	# Use init advice per hook
+	if ($init) {
+	  $mojo->hook(
+	    'on_' . ($name ne 'default' ? $name . '_' : '') . 'oro_init' =>
+	      $init
+	    )
+	};
+
 	# Database newly created
-	if ($oro->created) {
+	if ($oro->can('created') && $oro->created) {
 
 	  # Emit on_oro_init hook
 	  $mojo->plugins->emit_hook(
-	    'on_' . ($name ne 'default' ? $name . '_' : '') . 'oro_init' =>
-	      $oro
-	    );
+	    'on_' . ($name ne 'default' ? $name . '_' : '') . 'oro_init' => (
+	      $oro, $mojo
+	    )
+	  );
 
 	  # Initialization log message
-	  $mojo->log->debug(qq{Initialize Oro-DB "$name"});
+	  $mojo->log->info(qq{Initialized Oro-DB "$name"});
 	};
 
 	# No succesful creation
 	unless ($oro) {
-	  $mojo->log->warn("Unable to create database handle '$name'");
+	  $mojo->log->warn(qq{Unable to create database handle "$name"});
 	};
 
 	# Store database handle
@@ -133,7 +145,7 @@ Mojolicious::Plugin::Oro - DBIx::Oro driver plugin for Mojolicious
 
 =head1 SYNOPSIS
 
-  $app->plugin('Oro' => {
+  $app->plugin(Oro => {
     Books => {
       file => 'Database/Books.sqlite'
     }
@@ -208,7 +220,6 @@ The database handles have to be unique, i.e.
 you can't have multiple different C<default> databases in mounted
 applications using L<Mojolicious::Plugin::Mount>.
 
-
 =head1 HOOKS
 
 =head2 C<on_DBNAME_oro_init>
@@ -277,7 +288,7 @@ L<DBIx::Oro>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012-2013, Nils Diewald.
+Copyright (C) 2012-2015, Nils Diewald.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.

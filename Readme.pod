@@ -6,7 +6,7 @@ Mojolicious::Plugin::Oro - DBIx::Oro driver plugin for Mojolicious
 
 =head1 SYNOPSIS
 
-  $app->plugin('Oro' => {
+  $app->plugin(Oro => {
     Books => {
       file => 'Database/Books.sqlite'
     }
@@ -150,7 +150,7 @@ L<DBIx::Oro>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012-2013, Nils Diewald.
+Copyright (C) 2012-2014, Nils Diewald.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.

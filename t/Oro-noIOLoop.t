@@ -20,7 +20,7 @@ $app->plugin('Config' => {
 	init => sub {
 	  my $oro = shift;
 	  $oro->do(
-	    'CREATE TABLE Article (
+	    'CREATE TABLE IF NOT EXISTS Article (
                id     INTEGER PRIMARY KEY,
                titel  TEXT,
                inhalt TEXT
@@ -51,7 +51,7 @@ $app->plugin('Oro' => {
     file => $db_file,
     init => sub {
       my $oro = shift;
-      $oro->do('CREATE TABLE Content (
+      $oro->do('CREATE TABLE IF NOT EXISTS Content (
                   id      INTEGER PRIMARY KEY,
                   title   TEXT,
                   content TEXT
