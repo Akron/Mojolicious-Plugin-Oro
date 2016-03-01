@@ -81,7 +81,6 @@ The database handles have to be unique, i.e.
 you can't have multiple different C<default> databases in mounted
 applications using L<Mojolicious::Plugin::Mount>.
 
-
 =head1 HOOKS
 
 =head2 C<on_DBNAME_oro_init>
@@ -150,7 +149,7 @@ L<DBIx::Oro>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012-2014, Nils Diewald.
+Copyright (C) 2012-2015, Nils Diewald.
 
 This program is free software, you can redistribute it
 and/or modify it under the same terms as Perl.

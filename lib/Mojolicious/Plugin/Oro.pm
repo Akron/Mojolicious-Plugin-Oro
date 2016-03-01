@@ -3,7 +3,7 @@ use Mojo::Base 'Mojolicious::Plugin';
 use File::Spec;
 use DBIx::Oro;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 # Todo:
 # - return Mojo-Collections instead of Array-refs on select etc. Possible?
@@ -18,7 +18,7 @@ sub register {
   };
 
   # Hash of database handles
-  my $databases;
+  my ($databases, $db_init);
 
   # No databases attached
   unless ($mojo->can('oro_handles')) {
@@ -35,79 +35,84 @@ sub register {
   # Add oro_init command
   push @{$mojo->commands->namespaces}, __PACKAGE__;
 
-  # Init databases
-  Mojo::IOLoop->timer(
-    0 => sub {
+  # Initialize database
+  my $_init_database = sub {
 
-      # Loop through all databases
-      foreach my $name (keys %$param) {
-	my $db = $param->{$name};
+    $db_init = 1;
 
-	# Already exists
-	if (exists $databases->{$name}) {
-	  $mojo->log->warn("Multiple attempts to establish database '$name'");
-	  next;
-	};
+    # Loop through all databases
+    foreach my $name (keys %$param) {
+      my $db = $param->{$name};
 
-	# Make path portable
-	# (Especially for mounted apps)
-	if ($db->{file} &&
-	      index($db->{file}, ':') != 0 &&
-		!File::Spec->file_name_is_absolute($db->{file})) {
+      # Already exists
+      if (exists $databases->{$name}) {
+	$mojo->log->warn("Multiple attempts to establish database '$name'");
+	next;
+      };
 
-	  # Specify local path depending on app home
-	  $db->{file} = File::Spec->catdir($mojo->home, $db->{file});
-        };
+      # Make path portable
+      # (Especially for mounted apps)
+      if ($db->{file} &&
+	    index($db->{file}, ':') != 0 &&
+	      !File::Spec->file_name_is_absolute($db->{file})) {
 
-	# Remove init advice
-	my $init = delete $db->{init};
+	# Specify local path depending on app home
+	$db->{file} = File::Spec->catdir($mojo->home, $db->{file});
+      };
 
-	# Get Database handle
-	my $oro = DBIx::Oro->new(
-	  %$db,
-	  on_connect => sub {
-	    my $oro = shift;
-	    $mojo->log->info( 'Connect ' . $name . ' from ' . $$ );
+      # Remove init advice
+      my $init = delete $db->{init};
 
-	    # Emit on_oro_connect hook
-	    $mojo->plugins->emit_hook(
-	      'on_' . ($name ne 'default' ? $name . '_' : '') . 'oro_connect' =>
-		$oro, $mojo
-	      );
-          }
+      # Get Database handle
+      my $oro = DBIx::Oro->new(
+	%$db,
+	on_connect => sub {
+	  my $oro = shift;
+	  $mojo->log->info( 'Connect ' . $name . ' from ' . $$ );
+
+	  # Emit on_oro_connect hook
+	  $mojo->plugins->emit_hook(
+	    'on_' . ($name ne 'default' ? $name . '_' : '') . 'oro_connect' =>
+	      $oro, $mojo
+	    );
+	}
+      );
+
+      # Use init advice per hook
+      if ($init) {
+	$mojo->hook(
+	  'on_' . ($name ne 'default' ? $name . '_' : '') . 'oro_init' =>
+	    $init
+	  )
+      };
+
+      # Database newly created
+      if ($oro->can('created') && $oro->created) {
+
+	# Emit on_oro_init hook
+	$mojo->plugins->emit_hook(
+	  'on_' . ($name ne 'default' ? $name . '_' : '') . 'oro_init' => (
+	    $oro, $mojo
+	  )
 	);
 
-	# Use init advice per hook
-	if ($init) {
-	  $mojo->hook(
-	    'on_' . ($name ne 'default' ? $name . '_' : '') . 'oro_init' =>
-	      $init
-	    )
-	};
-
-	# Database newly created
-	if ($oro->can('created') && $oro->created) {
-
-	  # Emit on_oro_init hook
-	  $mojo->plugins->emit_hook(
-	    'on_' . ($name ne 'default' ? $name . '_' : '') . 'oro_init' => (
-	      $oro, $mojo
-	    )
-	  );
-
-	  # Initialization log message
-	  $mojo->log->info(qq{Initialized Oro-DB "$name"});
-	};
-
-	# No succesful creation
-	unless ($oro) {
-	  $mojo->log->warn(qq{Unable to create database handle "$name"});
-	};
-
-	# Store database handle
-	$databases->{$name} = $oro;
+	# Initialization log message
+	$mojo->log->info(qq{Initialized Oro-DB "$name"});
       };
-    }
+
+      # No succesful creation
+      unless ($oro) {
+	$mojo->log->warn(qq{Unable to create database handle "$name"});
+      };
+
+      # Store database handle
+      $databases->{$name} = $oro;
+    };
+  };
+
+  # Init databases
+  Mojo::IOLoop->timer(
+    0 => $_init_database
   );
 
   # Add helper
@@ -116,7 +121,10 @@ sub register {
       my ($c, $name, $table) = @_;
       $name //= 'default';
 
-      Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
+      unless ($db_init) {
+	$_init_database->();
+      }
+      # Mojo::IOLoop->next_tick unless Mojo::IOLoop->is_running;
 
       my $oro = $databases->{$name};
 
