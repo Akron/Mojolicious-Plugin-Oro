@@ -172,7 +172,9 @@ Mojolicious::Plugin::Oro - DBIx::Oro driver plugin for Mojolicious
 =head1 DESCRIPTION
 
 L<Mojolicious::Plugin::Oro> is a simple plugin to work with
-L<DBIx::Oro>.
+L<DBIx::Oro|https://github.com/Akron/DBIx-Oro>.
+
+B<Warning>: It is recommended to use L<Mojo::SQLite> instead of this module!
 
 =head1 HELPERS
 
@@ -220,7 +222,7 @@ L<Mojolicious::Plugin> and implements the following new ones.
 
 Called when registering the plugin.
 On creation, the plugin accepts a hash of database names
-associated with a L<DBIx::Oro> object.
+associated with a L<DBIx::Oro|https://github.com/Akron/DBIx-Oro> object.
 All parameters can be set either on registration or
 as part of the configuration file with the key C<Oro>.
 
@@ -286,7 +288,7 @@ L<Mojolicious::Plugin::Oro::oro_init> command.
 =head1 DEPENDENCIES
 
 L<Mojolicious>,
-L<DBIx::Oro>.
+L<DBIx::Oro|https://github.com/Akron/DBIx-Oro>.
 
 
 =head1 AVAILABILITY
