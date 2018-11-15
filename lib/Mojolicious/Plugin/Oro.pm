@@ -3,7 +3,7 @@ use Mojo::Base 'Mojolicious::Plugin';
 use File::Spec;
 use DBIx::Oro;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 # Todo:
 # - return Mojo-Collections instead of Array-refs on select etc. Possible?

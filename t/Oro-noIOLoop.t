@@ -106,12 +106,8 @@ is($c->oro->load(Article => { titel => 'Headline2' })->{inhalt}, 'Text2', 'Load'
 is($c->oro->load(Article => { titel => 'Headline3' })->{inhalt}, 'Text3', 'Load');
 is($c->oro->load(Article => { titel => 'Headline4' })->{inhalt}, 'Text4', 'Load');
 
-
 # Command
-is_deeply($app->commands->namespaces, [
-  'Mojolicious::Command',
-  'Mojolicious::Plugin::Oro'
-], 'Commands-Namespace');
+ok(grep/::Oro/, @{$app->commands->namespaces}, 'Namespace is set');
 
 ok($app->commands->run('oro_init'), 'Init');
 
